@@ -20,13 +20,13 @@ import java.time.Duration;
 
 @Service
 public class HttpClientFileDownloadService implements FileDownloadService {
-
     private static final Logger log = LoggerFactory.getLogger(HttpClientFileDownloadService.class);
+    private static final int MAX_ERROR_SNIPPET_LENGTH = 512;
+    private static final String ERROR_BODY_UNAVAILABLE = "[Could not retrieve body snippet]";
 
     private final HttpClient httpClient;
     private final HttpClientProperties properties;
 
-    // Inject the pre-configured HttpClient and properties
     public HttpClientFileDownloadService(HttpClient httpClient, HttpClientProperties properties) {
         this.httpClient = httpClient;
         this.properties = properties;
@@ -35,38 +35,84 @@ public class HttpClientFileDownloadService implements FileDownloadService {
 
     @Override
     public Resource downloadFile(URL url) throws DownloadException, InterruptedException {
-        HttpRequest request;
-        try {
-            request = buildRequest(url, Duration.ofMinutes(properties.getRequestTimeoutMinutes()));
-        } catch (URISyntaxException e) {
-            throw new DownloadException("Invalid URL syntax: " + url, e);
-        }
+        var request = createHttpRequest(url, Duration.ofMinutes(properties.getRequestTimeoutMinutes()));
         log.info("Sending request to download URL (to memory): {}", url);
+
         try {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            handleResponseErrors(response, url, null);
+            validateResponse(response, url, null);
+
             var body = response.body();
-            log.info("Successfully received response for URL: {}, Size: {} bytes", url, body != null ? body.length : 0);
+            logSuccessfulDownload(url, body);
+
             if (body == null) {
-                // Should not happen on success, but handle defensively
                 throw new DownloadException("Download successful (status %d) but response body was null for URL: %s"
                         .formatted(response.statusCode(), url));
             }
-            // Wrap a byte array into a Spring Resource
             return new ByteArrayResource(body);
         } catch (IOException e) {
-            throw mapToDownloadException("I/O error downloading " + url, e);
+            throw createDownloadException("I/O error downloading " + url, e);
         }
     }
 
     @Override
     public void downloadFile(URL url, Path destinationPath) throws DownloadException, InterruptedException {
-        HttpRequest request;
+        var request = createHttpRequest(url, Duration.ofMinutes(properties.getFileRequestTimeoutMinutes()));
+        ensureDirectoryExists(destinationPath);
+
+        log.info("Sending request to download URL: {} to Path: {}", url, destinationPath);
         try {
-            request = buildRequest(url, Duration.ofMinutes(properties.getFileRequestTimeoutMinutes()));
+            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofFile(destinationPath));
+            validateResponse(response, url, destinationPath);
+            log.info("Successfully downloaded file to: {}", response.body());
+        } catch (IOException e) {
+            throw createDownloadException("I/O error downloading " + url + " to " + destinationPath, e);
+        }
+    }
+
+    protected HttpRequest createHttpRequest(URL url, Duration timeout) throws DownloadException {
+        if (url == null) {
+            throw new IllegalArgumentException("URL cannot be null");
+        }
+        try {
+            return HttpRequest.newBuilder()
+                    .uri(url.toURI())
+                    .GET()
+                    .timeout(timeout)
+                    .build();
         } catch (URISyntaxException e) {
             throw new DownloadException("Invalid URL syntax: " + url, e);
         }
+    }
+
+    protected void validateResponse(HttpResponse<?> response, URL url, Path destinationPath) throws DownloadException {
+        var statusCode = response.statusCode();
+        if (HttpStatus.isSuccess(statusCode)) {
+            return;
+        }
+
+        var bodySnippet = extractErrorBodySnippet(response);
+        var errorMessage = String.format("HTTP request failed for URL: %s. Status Code: %d. Response Body Snippet: %s",
+                url, statusCode, bodySnippet);
+        log.warn(errorMessage);
+
+        cleanupFailedDownload(destinationPath);
+        throw new DownloadException(errorMessage);
+    }
+
+    protected void cleanupFailedDownload(Path destinationPath) {
+        if (destinationPath == null || !Files.exists(destinationPath)) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(destinationPath);
+            log.warn("Deleted incomplete/erroneous file at: {}", destinationPath);
+        } catch (IOException e) {
+            log.warn("Failed to delete incomplete file {}: {}", destinationPath, e.getMessage());
+        }
+    }
+
+    protected void ensureDirectoryExists(Path destinationPath) throws DownloadException {
         try {
             var parentDir = destinationPath.getParent();
             if (parentDir != null) {
@@ -75,76 +121,42 @@ public class HttpClientFileDownloadService implements FileDownloadService {
         } catch (IOException e) {
             throw new DownloadException("Failed to create directory structure for " + destinationPath, e);
         }
-        log.info("Sending request to download URL: {} to Path: {}", url, destinationPath);
+    }
+
+    protected String extractErrorBodySnippet(HttpResponse<?> response) {
         try {
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofFile(destinationPath));
-            handleResponseErrors(response, url, destinationPath);
-            log.info("Successfully downloaded file to: {}", response.body());
-        } catch (IOException e) {
-            throw mapToDownloadException("I/O error downloading " + url + " to " + destinationPath, e);
-        }
-    }
-
-    private HttpRequest buildRequest(URL url, Duration timeout) throws URISyntaxException {
-        if (url == null) {
-            throw new IllegalArgumentException("URL cannot be null");
-        }
-        return HttpRequest.newBuilder()
-                .uri(url.toURI())
-                .GET()
-                .timeout(timeout)
-                .build();
-    }
-
-    /**
-     * Checks the HTTP response status code and throws an IOException for non-successful codes (outside 200-299).
-     * Attempts to delete the target file if the download failed and a path was provided.
-     */
-    private void handleResponseErrors(HttpResponse<?> response, URL url, Path destinationPath)
-            throws DownloadException {
-        int statusCode = response.statusCode();
-        // Consider 2xx status codes as a success
-        if (statusCode >= 200 && statusCode < 300) {
-            return;
-        }
-        var bodySnippet = extractErrorBodySnippet(response);
-        var errorMessage = String.format("HTTP request failed for URL: %s. Status Code: %d. Response Body Snippet: %s",
-                url, statusCode, bodySnippet);
-        log.warn(errorMessage);
-        // Attempt to delete the potentially partial file if the download was to a path
-        if (destinationPath != null && Files.exists(destinationPath)) {
-            try {
-                if (!Files.deleteIfExists(destinationPath)) {
-                    log.warn("Deleted incomplete/erroneous file at: {}", destinationPath);
-                }
-            } catch (IOException deleteException) {
-                log.warn("Failed to delete incomplete file {} after HTTP error {}: {}", destinationPath,
-                        statusCode, deleteException.getMessage());
-            }
-        }
-        throw new DownloadException(errorMessage);
-    }
-
-    private String extractErrorBodySnippet(HttpResponse<?> response) {
-        try {
-            if (response.body() instanceof byte[] bytes && bytes.length > 0) {
-                return new String(bytes, 0, Math.min(bytes.length, 512)); // Limit snippet size
-            } else if (response.body() instanceof String s && !s.isEmpty()) {
-                return s.substring(0, Math.min(s.length(), 512));
-            } else if (response.body() instanceof Path p) {
-                // Avoid reading potentially large error files, just report the path
+            var body = response.body();
+            if (body instanceof byte[] bytes && bytes.length > 0) {
+                return new String(bytes, 0, Math.min(bytes.length, MAX_ERROR_SNIPPET_LENGTH));
+            } else if (body instanceof String s && !s.isEmpty()) {
+                return s.substring(0, Math.min(s.length(), MAX_ERROR_SNIPPET_LENGTH));
+            } else if (body instanceof Path p) {
                 return "[Error body content likely in file: " + p + "]";
             }
         } catch (Exception e) {
             log.warn("Could not extract error body snippet: {}", e.getMessage());
         }
-        return "[Could not retrieve body snippet]";
+        return ERROR_BODY_UNAVAILABLE;
     }
 
-    private DownloadException mapToDownloadException(String message, IOException cause) {
+    private void logSuccessfulDownload(URL url, byte[] body) {
+        log.info("Successfully received response for URL: {}, Size: {} bytes", 
+                url, body != null ? body.length : 0);
+    }
+
+    protected DownloadException createDownloadException(String message, IOException cause) {
         if (cause instanceof javax.net.ssl.SSLHandshakeException) {
             return new DownloadException(message + ". SSL handshake failed, check SSL configuration/trust.", cause);
         }
         return new DownloadException(message, cause);
+    }
+
+    private static class HttpStatus {
+        private static final int SUCCESS_MIN = 200;
+        private static final int SUCCESS_MAX = 299;
+
+        static boolean isSuccess(int statusCode) {
+            return statusCode >= SUCCESS_MIN && statusCode <= SUCCESS_MAX;
+        }
     }
 }
