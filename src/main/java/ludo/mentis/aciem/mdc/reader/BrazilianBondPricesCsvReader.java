@@ -13,8 +13,37 @@ import java.util.Map;
 
 public class BrazilianBondPricesCsvReader extends FlatFileItemReader<BrazilianBondPrice> {
 
+    private static final int DEFAULT_LINES_TO_SKIP = 3; // Default number of header lines to skip
+
+    /**
+     * Creates a new BrazilianBondPricesCsvReader with the default configuration.
+     * 
+     * @param fileContent the content of the file to read
+     * @param fileName the name of the file (used for error messages)
+     */
     public BrazilianBondPricesCsvReader(byte[] fileContent, String fileName) {
+        this(fileContent, fileName, DEFAULT_LINES_TO_SKIP);
+    }
+
+    /**
+     * Creates a new BrazilianBondPricesCsvReader with a custom number of lines to skip.
+     * 
+     * @param fileContent the content of the file to read
+     * @param fileName the name of the file (used for error messages)
+     * @param linesToSkip the number of lines to skip at the beginning of the file
+     */
+    public BrazilianBondPricesCsvReader(byte[] fileContent, String fileName, int linesToSkip) {
         super();
+
+        if (fileContent == null) {
+            throw new IllegalArgumentException("File content cannot be null");
+        }
+        if (fileName == null || fileName.trim().isEmpty()) {
+            throw new IllegalArgumentException("File name cannot be null or empty");
+        }
+        if (linesToSkip < 0) {
+            throw new IllegalArgumentException("Lines to skip cannot be negative");
+        }
 
         var fieldSetMapper = new BeanWrapperFieldSetMapper<BrazilianBondPrice>();
         fieldSetMapper.setTargetType(BrazilianBondPrice.class);
@@ -28,7 +57,7 @@ public class BrazilianBondPricesCsvReader extends FlatFileItemReader<BrazilianBo
         lineMapper.setFieldSetMapper(fieldSetMapper);
 
         setResource(new ByteArrayResource(fileContent, fileName));
-        setLinesToSkip(3); // skip headers
+        setLinesToSkip(linesToSkip);
         setLineMapper(lineMapper);
     }
 

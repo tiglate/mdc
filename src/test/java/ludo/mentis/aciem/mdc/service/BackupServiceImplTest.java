@@ -42,12 +42,12 @@ class BackupServiceImplTest {
     @BeforeEach
     void setUp() throws IOException {
         // Create a test file in the temp directory
-        Path testFile = Files.createFile(tempDir.resolve("file.txt"));
+        var testFile = Files.createFile(tempDir.resolve("file.txt"));
         validFilePath = testFile.toString();
         resolvedPath = testFile;
 
         // Create a backup path in the temp directory
-        Path backupDir = tempDir.resolve(Paths.get("2023", "05", "15"));
+        var backupDir = tempDir.resolve(Paths.get("2023", "05", "15"));
         Files.createDirectories(backupDir);
         backupPath = backupDir.resolve("file.txt");
     }
@@ -72,7 +72,7 @@ class BackupServiceImplTest {
     @Test
     void backup_withFilePathAndDaysBack_shouldUseSpecifiedDaysBack() throws IOException, HolidaysNotAvailableException {
         // Given
-        int daysBack = 5;
+        var daysBack = 5;
         when(fileHandler.validateAndResolvePath(validFilePath)).thenReturn(resolvedPath);
         when(holidayManager.calculateTargetDate(daysBack, true, "BRA")).thenReturn(targetDate);
         when(fileHandler.createBackupPath(resolvedPath, targetDate)).thenReturn(backupPath);
@@ -90,8 +90,8 @@ class BackupServiceImplTest {
     @Test
     void backup_withFilePathDaysBackAndConsiderBusinessDays_shouldUseSpecifiedValues() throws IOException, HolidaysNotAvailableException {
         // Given
-        int daysBack = 3;
-        boolean considerBusinessDays = false;
+        var daysBack = 3;
+        var considerBusinessDays = false;
         when(fileHandler.validateAndResolvePath(validFilePath)).thenReturn(resolvedPath);
         when(holidayManager.calculateTargetDate(daysBack, considerBusinessDays, "BRA")).thenReturn(targetDate);
         when(fileHandler.createBackupPath(resolvedPath, targetDate)).thenReturn(backupPath);
@@ -109,7 +109,7 @@ class BackupServiceImplTest {
     @Test
     void backup_withFilePathAndCountryCode_shouldUseSpecifiedCountryCode() throws IOException, HolidaysNotAvailableException {
         // Given
-        String customCountryCode = "USA";
+        var customCountryCode = "USA";
         when(fileHandler.validateAndResolvePath(validFilePath)).thenReturn(resolvedPath);
         when(holidayManager.calculateTargetDate(1, true, customCountryCode)).thenReturn(targetDate);
         when(fileHandler.createBackupPath(resolvedPath, targetDate)).thenReturn(backupPath);
@@ -127,9 +127,9 @@ class BackupServiceImplTest {
     @Test
     void backup_withAllParameters_shouldUseAllSpecifiedValues() throws IOException, HolidaysNotAvailableException {
         // Given
-        int daysBack = 7;
-        boolean considerBusinessDays = false;
-        String customCountryCode = "USA";
+        var daysBack = 7;
+        var considerBusinessDays = false;
+        var customCountryCode = "USA";
         when(fileHandler.validateAndResolvePath(validFilePath)).thenReturn(resolvedPath);
         when(holidayManager.calculateTargetDate(daysBack, considerBusinessDays, customCountryCode)).thenReturn(targetDate);
         when(fileHandler.createBackupPath(resolvedPath, targetDate)).thenReturn(backupPath);
@@ -163,7 +163,7 @@ class BackupServiceImplTest {
     @Test
     void backup_shouldPropagateNoSuchFileException_fromFileHandler() throws IOException {
         // Given
-        String invalidFilePath = "nonexistent.txt";
+        var invalidFilePath = "nonexistent.txt";
         when(fileHandler.validateAndResolvePath(invalidFilePath))
                 .thenThrow(new NoSuchFileException("File not found"));
 
