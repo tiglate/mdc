@@ -1,0 +1,22 @@
+package ludo.mentis.aciem.mdc.reader;
+
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
+
+import java.text.NumberFormat;
+import java.util.Locale;
+
+public class BrazilianBigDecimalEditor extends CustomNumberEditor {
+
+    public BrazilianBigDecimalEditor() {
+        super(java.math.BigDecimal.class, NumberFormat.getInstance(new Locale("pt", "BR")), true);
+    }
+
+    @Override
+    public void setAsText(String text) throws IllegalArgumentException {
+        if ("--".equalsIgnoreCase(text)) {
+            setValue(null);
+            return;
+        }
+        super.setAsText(text);
+    }
+}

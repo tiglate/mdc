@@ -64,10 +64,18 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
             row.createCell(7).setCellValue(item.getIndicativeRate().doubleValue());
             row.createCell(8).setCellValue(item.getPrice().doubleValue());
             row.createCell(9).setCellValue(item.getStandardDeviation().doubleValue());
-            row.createCell(10).setCellValue(item.getLowerIntervalD0().doubleValue());
-            row.createCell(11).setCellValue(item.getUpperIntervalD0().doubleValue());
-            row.createCell(12).setCellValue(item.getLowerIntervalD1().doubleValue());
-            row.createCell(13).setCellValue(item.getUpperIntervalD1().doubleValue());
+            if (item.getLowerIntervalD0() != null) {
+                row.createCell(10).setCellValue(item.getLowerIntervalD0().doubleValue());
+            }
+            if (item.getUpperIntervalD0() != null) {
+                row.createCell(11).setCellValue(item.getUpperIntervalD0().doubleValue());
+            }
+            if (item.getLowerIntervalD1() != null) {
+                row.createCell(12).setCellValue(item.getLowerIntervalD1().doubleValue());
+            }
+            if (item.getUpperIntervalD1() != null) {
+                row.createCell(13).setCellValue(item.getUpperIntervalD1().doubleValue());
+            }
             row.createCell(14).setCellValue(item.getCriteria());
         }
 

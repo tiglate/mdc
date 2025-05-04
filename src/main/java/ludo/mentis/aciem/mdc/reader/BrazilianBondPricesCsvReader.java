@@ -5,13 +5,10 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.io.ByteArrayResource;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.LocalDate;
-import java.util.Locale;
 import java.util.Map;
 
 public class BrazilianBondPricesCsvReader extends FlatFileItemReader<BrazilianBondPrice> {
@@ -23,8 +20,7 @@ public class BrazilianBondPricesCsvReader extends FlatFileItemReader<BrazilianBo
         fieldSetMapper.setTargetType(BrazilianBondPrice.class);
         fieldSetMapper.setCustomEditors(Map.of(
                 LocalDate.class, new CustomLocalDateEditor("yyyyMMdd"),
-                BigDecimal.class, new CustomNumberEditor(BigDecimal.class,
-                        NumberFormat.getInstance(new Locale("pt", "BR")), false)
+                BigDecimal.class, new BrazilianBigDecimalEditor()
         ));
 
         var lineMapper = new DefaultLineMapper<BrazilianBondPrice>();
