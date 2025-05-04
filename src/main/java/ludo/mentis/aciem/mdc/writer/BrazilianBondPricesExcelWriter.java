@@ -22,9 +22,9 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
     private final Sheet sheet;
     private int currentRow = 1; // 0 is for header
 
-    public BrazilianBondPricesExcelWriter(String outputDir) {
-        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        this.outputPath = Paths.get(outputDir, "anbima-" + today + ".xlsx");
+    public BrazilianBondPricesExcelWriter(LocalDate referenceDate, String outputDir) {
+        var date = referenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.outputPath = Paths.get(outputDir, "anbima-" + date + ".xlsx");
 
         try {
             if (Files.exists(outputPath)) {

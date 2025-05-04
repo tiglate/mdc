@@ -1,4 +1,4 @@
-package ludo.mentis.aciem.mdc;
+package ludo.mentis.aciem.mdc.reader;
 
 import java.beans.PropertyEditorSupport;
 import java.time.LocalDate;
