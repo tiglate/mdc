@@ -1,6 +1,7 @@
 package ludo.mentis.aciem.mdc.writer;
 
 import ludo.mentis.aciem.mdc.model.BrazilianBondPrice;
+import ludo.mentis.aciem.mdc.service.BackupService;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -26,10 +27,21 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
     private final Sheet sheet;
     private int currentRow = 1;
     private int headersCount;
+    private final BackupService backupService;
 
-    public BrazilianBondPricesExcelWriter(LocalDate referenceDate, String outputDir) {
-        var date = referenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        this.outputPath = Paths.get(outputDir, "anbima-" + date + ".xlsx");
+    public BrazilianBondPricesExcelWriter(BackupService backupService, LocalDate referenceDate, String outputDir) {
+        this.backupService = backupService;
+        //var date = referenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.outputPath = Paths.get(outputDir, "BrazilianBondPrices.xlsx");
+
+        if (this.outputPath.toFile().exists()) {
+            try {
+                this.backupService.backup(this.outputPath.toString());
+            }
+            catch (Exception ex) {
+                throw new RuntimeException("Could not backup existing file: " + this.outputPath, ex);
+            }
+        }
 
         try {
             if (Files.exists(outputPath)) {
@@ -64,15 +76,31 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         for (var item : chunk) {
             var row = sheet.createRow(currentRow++);
             row.createCell(0).setCellValue(item.getTitle());
-            row.createCell(1).setCellValue(item.getReferenceDate().toString());
+            if (item.getReferenceDate() != null) {
+                row.createCell(1).setCellValue(item.getReferenceDate().toString());
+            }
             row.createCell(2).setCellValue(item.getSelicCode());
-            row.createCell(3).setCellValue(item.getBaseDate().toString());
-            row.createCell(4).setCellValue(item.getMaturityDate().toString());
-            row.createCell(5).setCellValue(item.getBuyRate().doubleValue());
-            row.createCell(6).setCellValue(item.getSellRate().doubleValue());
-            row.createCell(7).setCellValue(item.getIndicativeRate().doubleValue());
-            row.createCell(8).setCellValue(item.getPrice().doubleValue());
-            row.createCell(9).setCellValue(item.getStandardDeviation().doubleValue());
+            if (item.getBaseDate() != null) {
+                row.createCell(3).setCellValue(item.getBaseDate().toString());
+            }
+            if (item.getMaturityDate() != null) {
+                row.createCell(4).setCellValue(item.getMaturityDate().toString());
+            }
+            if (item.getBuyRate() != null) {
+                row.createCell(5).setCellValue(item.getBuyRate().doubleValue());
+            }
+            if (item.getSellRate() != null) {
+                row.createCell(6).setCellValue(item.getSellRate().doubleValue());
+            }
+            if (item.getIndicativeRate() != null) {
+                row.createCell(7).setCellValue(item.getIndicativeRate().doubleValue());
+            }
+            if (item.getPrice() != null) {
+                row.createCell(8).setCellValue(item.getPrice().doubleValue());
+            }
+            if (item.getStandardDeviation() != null) {
+                row.createCell(9).setCellValue(item.getStandardDeviation().doubleValue());
+            }
             if (item.getLowerIntervalD0() != null) {
                 row.createCell(10).setCellValue(item.getLowerIntervalD0().doubleValue());
             }
@@ -103,7 +131,7 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         table.setName("Tb_Anbima");
         table.setStyleName("TableStyleMedium2");
 
-        try (var out = Files.newOutputStream(outputPath)) {
+        try (var out = Files.newOutputStream(this.outputPath)) {
             workbook.write(out);
         }
 

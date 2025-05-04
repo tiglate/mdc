@@ -2,6 +2,7 @@ package ludo.mentis.aciem.mdc.config;
 
 import ludo.mentis.aciem.mdc.model.BrazilianBondPrice;
 import ludo.mentis.aciem.mdc.reader.BrazilianBondPricesCsvReader;
+import ludo.mentis.aciem.mdc.service.BackupService;
 import ludo.mentis.aciem.mdc.service.FileDownloadService;
 import ludo.mentis.aciem.mdc.tasklet.BrazilianBondPricesDownloader;
 import ludo.mentis.aciem.mdc.writer.BrazilianBondPricesExcelWriter;
@@ -55,11 +56,12 @@ public class BrazilianBondPricesJobConfig {
     Step processFileStep(@Value("#{jobExecutionContext['fileName']}") String fileName,
                          @Value("#{jobExecutionContext['fileContent']}") byte[] fileContent,
                          @Value("#{jobExecutionContext['referenceDate']}") LocalDate referenceDate,
-                         @Value("${brazilian-bond-prices.output-dir}") String outputDir) {
+                         @Value("${brazilian-bond-prices.output-dir}") String outputDir,
+                         BackupService backupService) {
         return new StepBuilder("ProcessFileStep", jobRepository)
                 .<BrazilianBondPrice, BrazilianBondPrice>chunk(1000, this.transactionManager)
                 .reader(new BrazilianBondPricesCsvReader(fileContent, fileName))
-                .writer(new BrazilianBondPricesExcelWriter(referenceDate, outputDir))
+                .writer(new BrazilianBondPricesExcelWriter(backupService, referenceDate, outputDir))
                 .build();
     }
 }
