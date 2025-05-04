@@ -1,6 +1,7 @@
 package ludo.mentis.aciem.mdc.service;
 
 import jakarta.annotation.PostConstruct;
+import ludo.mentis.aciem.mdc.exception.HolidayLoadException;
 import ludo.mentis.aciem.mdc.exception.HolidaysNotAvailableException;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class BackupServiceImpl implements BackupService {
     }
 
     @PostConstruct
-    private void initialize() throws Exception {
+    private void initialize() throws HolidayLoadException {
         holidayManager.initialize();
     }
 
