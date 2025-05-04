@@ -1,9 +1,13 @@
 package ludo.mentis.aciem.mdc.writer;
 
 import ludo.mentis.aciem.mdc.model.BrazilianBondPrice;
+import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
@@ -20,7 +24,8 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
     private final Path outputPath;
     private final Workbook workbook;
     private final Sheet sheet;
-    private int currentRow = 1; // 0 is for header
+    private int currentRow = 1;
+    private int headersCount;
 
     public BrazilianBondPricesExcelWriter(LocalDate referenceDate, String outputDir) {
         var date = referenceDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -29,12 +34,15 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         try {
             if (Files.exists(outputPath)) {
                 this.workbook = WorkbookFactory.create(Files.newInputStream(outputPath));
-                this.sheet = workbook.getSheet("Anbima");
+                var index = workbook.getSheetIndex("Anbima");
+                if (index >= 0) {
+                    workbook.removeSheetAt(index);
+                }
             } else {
                 this.workbook = new XSSFWorkbook();
-                this.sheet = workbook.createSheet("Anbima");
-                writeHeader();
             }
+            this.sheet = workbook.createSheet("Anbima");
+            writeHeader();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -48,6 +56,7 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         for (int i = 0; i < headers.length; i++) {
             header.createCell(i).setCellValue(headers[i]);
         }
+        headersCount = headers.length;
     }
 
     @Override
@@ -79,8 +88,25 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
             row.createCell(14).setCellValue(item.getCriteria());
         }
 
+        // Auto-size columns
+        for (int i = 0; i < headersCount; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Create table
+        var area = new AreaReference(
+                new CellReference(0, 0),
+                new CellReference(sheet.getLastRowNum(), headersCount - 1),
+                SpreadsheetVersion.EXCEL2007
+        );
+        var table = ((XSSFSheet) sheet).createTable(area);
+        table.setName("Tb_Anbima");
+        table.setStyleName("TableStyleMedium2");
+
         try (var out = Files.newOutputStream(outputPath)) {
             workbook.write(out);
         }
+
+        workbook.close();
     }
 }
