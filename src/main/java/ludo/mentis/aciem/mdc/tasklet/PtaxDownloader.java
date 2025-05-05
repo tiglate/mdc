@@ -1,0 +1,53 @@
+package ludo.mentis.aciem.mdc.tasklet;
+
+import ludo.mentis.aciem.mdc.service.FileDownloadService;
+import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.lang.NonNull;
+
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+public class PtaxDownloader implements Tasklet {
+
+    private final FileDownloadService fileDownloadService;
+    private final String serviceUrl;
+
+    public PtaxDownloader(FileDownloadService fileDownloadService, String serviceUrl) {
+        this.fileDownloadService = fileDownloadService;
+        this.serviceUrl = this.constructDownloadUrl(serviceUrl);
+    }
+
+    @Override
+    public RepeatStatus execute(@NonNull StepContribution contribution, @NonNull ChunkContext chunkContext) throws Exception {
+        var fileUrl = new URL(serviceUrl);
+
+        var jobContext = contribution.getStepExecution()
+                .getJobExecution()
+                .getExecutionContext();
+
+        jobContext.put("fileContent", fileDownloadService.downloadFile(fileUrl).getContentAsByteArray());
+
+        return RepeatStatus.FINISHED;
+    }
+
+    /**
+     * Constructs the URL for downloading Ptax data.
+     *
+     * @param downloadUrl The base URL pattern from application.properties
+     * @return The formatted URL with date parameters
+     */
+    public static String constructDownloadUrl(String downloadUrl) {
+        var endDate = LocalDate.now();
+        var startDate = endDate.minusDays(30);
+
+        var formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+        var formattedStartDate = startDate.format(formatter);
+        var formattedEndDate = endDate.format(formatter);
+
+        return String.format(downloadUrl, formattedStartDate, formattedEndDate);
+    }
+}

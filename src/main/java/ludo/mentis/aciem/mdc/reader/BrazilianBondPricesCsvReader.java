@@ -1,6 +1,8 @@
 package ludo.mentis.aciem.mdc.reader;
 
 import ludo.mentis.aciem.mdc.model.BrazilianBondPrice;
+import ludo.mentis.aciem.mdc.reader.editor.BrazilianBigDecimalEditor;
+import ludo.mentis.aciem.mdc.reader.editor.CustomLocalDateEditor;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;

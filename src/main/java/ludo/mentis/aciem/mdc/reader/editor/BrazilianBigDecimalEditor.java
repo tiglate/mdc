@@ -1,4 +1,4 @@
-package ludo.mentis.aciem.mdc.reader;
+package ludo.mentis.aciem.mdc.reader.editor;
 
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 
