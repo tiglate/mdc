@@ -62,7 +62,7 @@ public class HttpClientConfig {
     private void configureSsl(HttpClient.Builder builder, HttpClientProperties.SslProperties sslProps)
             throws NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, KeyManagementException {
         SSLContext sslContext;
-        String caCertPath = sslProps.getCustomCaCertificatePath();
+        var caCertPath = sslProps.getCustomCaCertificatePath();
         if (StringUtils.hasText(caCertPath)) {
             log.info("Configuring HttpClient with custom SSL Context using CA: {}", caCertPath);
             sslContext = createCustomSslContext(caCertPath);
@@ -104,12 +104,12 @@ public class HttpClientConfig {
         log.debug("Created in-memory trust store with custom CA.");
 
         // Create a TrustManagerFactory that uses the custom KeyStore
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        var tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(customTrustStore);
         log.debug("Initialized TrustManagerFactory with custom trust store.");
 
         // Create an SSLContext initialized with the custom TrustManager
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+        var sslContext = SSLContext.getInstance("TLSv1.3");
         sslContext.init(null, tmf.getTrustManagers(), null);
         log.debug("Initialized SSLContext with custom TrustManagers.");
 
