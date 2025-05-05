@@ -1,6 +1,6 @@
 package ludo.mentis.aciem.mdc.writer;
 
-import ludo.mentis.aciem.mdc.model.BrazilianBondPrice;
+import ludo.mentis.aciem.mdc.model.FinancialIndicator;
 import ludo.mentis.aciem.mdc.service.BackupService;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.*;
@@ -23,31 +23,26 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondPrice> {
-    private static final String SHEET_NAME = "Anbima";
+public class FinancialIndicatorExcelWriter implements ItemWriter<FinancialIndicator> {
+    private static final String SHEET_NAME = "FI";
     private static final String AUDIT_SHEET_NAME = "Audit";
-    private static final String TABLE_NAME = "Tb_Anbima";
+    private static final String TABLE_NAME = "Tb_FI";
     private static final String TABLE_STYLE = "TableStyleMedium2";
-    private static final String FILE_NAME = "BrazilianBondPrices.xlsx";
+    private static final String FILE_NAME = "FinancialIndicators.xlsx";
     private static final String[] COLUMN_HEADERS = {
-            "Titulo", "Data Referencia", "Codigo SELIC", "Data Base/Emissao",
-            "Data Vencimento", "Tx. Compra", "Tx. Venda", "Tx. Indicativas", "PU",
-            "Desvio padrao", "Interv. Ind. Inf. (D0)", "Interv. Ind. Sup. (D0)",
-            "Interv. Ind. Inf. (D+1)", "Interv. Ind. Sup. (D+1)", "Criterio"
+            "Security ID Code", "Group", "Description", "Value", "Last Update"
     };
 
     private final Path outputPath;
     private final Workbook workbook;
     private final Sheet sheet;
     private final ExcelHelper excelHelper;
-    private final LocalDate referenceDate;
     private int currentRow = 1;
-    private final Logger log = LoggerFactory.getLogger(BrazilianBondPricesExcelWriter.class);
+    private final Logger log = LoggerFactory.getLogger(FinancialIndicatorExcelWriter.class);
 
-    public BrazilianBondPricesExcelWriter(BackupService backupService, LocalDate referenceDate, String outputDir) {
-        this.referenceDate = referenceDate;
+    public FinancialIndicatorExcelWriter(BackupService backupService, String outputDir) {
         this.outputPath = Paths.get(outputDir, FILE_NAME);
-        this.workbook = initializeWorkbook(backupService, referenceDate);
+        this.workbook = initializeWorkbook(backupService);
         this.sheet = createSheet();
         this.excelHelper = new ExcelHelper(sheet);
         writeHeader();
@@ -60,17 +55,10 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         // Create rows for audit information
         Row titleRow = auditSheet.createRow(0);
         Cell titleCell = titleRow.createCell(0);
-        titleCell.setCellValue("Brazilian Bond Prices - Audit Information");
-
-        // Reference date
-        Row dateRow = auditSheet.createRow(2);
-        Cell dateLabelCell = dateRow.createCell(0);
-        dateLabelCell.setCellValue("Reference Date:");
-        Cell dateValueCell = dateRow.createCell(1);
-        excelHelper.setCellValue(dateRow, 1, referenceDate);
+        titleCell.setCellValue("Financial Indicators - Audit Information");
 
         // Creation timestamp
-        Row timestampRow = auditSheet.createRow(3);
+        Row timestampRow = auditSheet.createRow(2);
         Cell timestampLabelCell = timestampRow.createCell(0);
         timestampLabelCell.setCellValue("Created At:");
 
@@ -81,7 +69,7 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         timestampValueCell.setCellStyle(excelHelper.getDateCellStyle());
 
         // User information
-        Row userRow = auditSheet.createRow(4);
+        Row userRow = auditSheet.createRow(3);
         Cell userLabelCell = userRow.createCell(0);
         userLabelCell.setCellValue("Created By:");
         Cell userValueCell = userRow.createCell(1);
@@ -92,8 +80,8 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         auditSheet.autoSizeColumn(1);
     }
 
-    private Workbook initializeWorkbook(BackupService backupService, LocalDate referenceDate) {
-        handleBackup(backupService, referenceDate);
+    private Workbook initializeWorkbook(BackupService backupService) {
+        handleBackup(backupService);
         try {
             if (Files.exists(outputPath)) {
                 var wb = WorkbookFactory.create(Files.newInputStream(outputPath));
@@ -106,12 +94,12 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         }
     }
 
-    private void handleBackup(BackupService backupService, LocalDate referenceDate) {
+    private void handleBackup(BackupService backupService) {
         if (outputPath.toFile().exists()) {
             try {
                 backupService.backup(outputPath.toString());
             } catch (Exception ex) {
-                log.error("[{}] Could not backup existing file: {}", referenceDate, outputPath, ex);
+                log.error("Could not backup existing file: {}", outputPath, ex);
             }
         }
     }
@@ -135,7 +123,7 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
     }
 
     @Override
-    public void write(Chunk<? extends BrazilianBondPrice> chunk) throws Exception {
+    public void write(Chunk<? extends FinancialIndicator> chunk) throws Exception {
         for (var item : chunk) {
             writeRow(item);
         }
@@ -143,23 +131,17 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         saveWorkbook();
     }
 
-    private void writeRow(BrazilianBondPrice item) {
+    private void writeRow(FinancialIndicator item) {
         var row = sheet.createRow(currentRow++);
-        excelHelper.setCellValue(row, 0, item.getTitle());
-        excelHelper.setCellValue(row, 1, item.getReferenceDate());
-        excelHelper.setCellValue(row, 2, item.getSelicCode());
-        excelHelper.setCellValue(row, 3, item.getBaseDate());
-        excelHelper.setCellValue(row, 4, item.getMaturityDate());
-        excelHelper.setCellValue(row, 5, item.getBuyRate());
-        excelHelper.setCellValue(row, 6, item.getSellRate());
-        excelHelper.setCellValue(row, 7, item.getIndicativeRate());
-        excelHelper.setCellValue(row, 8, item.getPrice());
-        excelHelper.setCellValue(row, 9, item.getStandardDeviation());
-        excelHelper.setCellValue(row, 10, item.getLowerIntervalD0());
-        excelHelper.setCellValue(row, 11, item.getUpperIntervalD0());
-        excelHelper.setCellValue(row, 12, item.getLowerIntervalD1());
-        excelHelper.setCellValue(row, 13, item.getUpperIntervalD1());
-        excelHelper.setCellValue(row, 14, item.getCriteria());
+        excelHelper.setCellValue(row, 0, item.getSecurityIdentificationCode());
+        excelHelper.setCellValue(row, 1, item.getGroupDescription());
+        excelHelper.setCellValue(row, 2, item.getDescription());
+        if (item.getValue() != null) {
+            excelHelper.setCellValue(row, 3, item.getValue());
+        } else if (item.getRate() != null) {
+            excelHelper.setCellValue(row, 3, item.getRate());
+        }
+        excelHelper.setCellValue(row, 4, item.getLastUpdate());
     }
 
     private void finalizeSheet() {

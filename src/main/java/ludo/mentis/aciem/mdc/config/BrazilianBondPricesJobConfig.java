@@ -32,19 +32,19 @@ public class BrazilianBondPricesJobConfig {
     }
 
     @Bean
-    Job brazilianBondsPricesJob(Step downloadFileStep, Step processFileStep) {
+    Job brazilianBondsPricesJob(Step downloadFileStepBBP, Step processFileStepBBP) {
         return new JobBuilder("BrazilianBondPrices", this.jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(downloadFileStep)
-                .next(processFileStep)
+                .start(downloadFileStepBBP)
+                .next(processFileStepBBP)
                 .build();
     }
 
     @Bean
     @JobScope
-    Step downloadFileStep(FileDownloadService fileDownloadService,
-                          @Value("${brazilian-bond-prices.download-base-url}") String baseUrl,
-                          @Value("#{jobParameters['referenceDate'] ?: null}") LocalDate referenceDate) {
+    Step downloadFileStepBBP(FileDownloadService fileDownloadService,
+                             @Value("${brazilian-bond-prices.download-base-url}") String baseUrl,
+                             @Value("#{jobParameters['referenceDate'] ?: null}") LocalDate referenceDate) {
         return new StepBuilder("DownloadFile", this.jobRepository)
                 .tasklet(new BrazilianBondPricesDownloader(fileDownloadService, referenceDate, baseUrl),
                         this.transactionManager)
@@ -53,11 +53,11 @@ public class BrazilianBondPricesJobConfig {
 
     @Bean
     @JobScope
-    Step processFileStep(@Value("#{jobExecutionContext['fileName']}") String fileName,
-                         @Value("#{jobExecutionContext['fileContent']}") byte[] fileContent,
-                         @Value("#{jobExecutionContext['referenceDate']}") LocalDate referenceDate,
-                         @Value("${brazilian-bond-prices.output-dir}") String outputDir,
-                         BackupService backupService) {
+    Step processFileStepBBP(@Value("#{jobExecutionContext['fileName']}") String fileName,
+                            @Value("#{jobExecutionContext['fileContent']}") byte[] fileContent,
+                            @Value("#{jobExecutionContext['referenceDate']}") LocalDate referenceDate,
+                            @Value("${brazilian-bond-prices.output-dir}") String outputDir,
+                            BackupService backupService) {
         return new StepBuilder("ProcessFileStep", jobRepository)
                 .<BrazilianBondPrice, BrazilianBondPrice>chunk(1000, this.transactionManager)
                 .reader(new BrazilianBondPricesCsvReader(fileContent, fileName))
