@@ -5,6 +5,7 @@ import ludo.mentis.aciem.mdc.reader.BrazilianBondPricesCsvReader;
 import ludo.mentis.aciem.mdc.service.BackupService;
 import ludo.mentis.aciem.mdc.service.FileDownloadService;
 import ludo.mentis.aciem.mdc.tasklet.BrazilianBondPricesDownloader;
+import ludo.mentis.aciem.mdc.util.ExcelHelper;
 import ludo.mentis.aciem.mdc.writer.BrazilianBondPricesExcelWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -57,11 +58,12 @@ public class BrazilianBondPricesJobConfig {
                             @Value("#{jobExecutionContext['fileContent']}") byte[] fileContent,
                             @Value("#{jobExecutionContext['referenceDate']}") LocalDate referenceDate,
                             @Value("${brazilian-bond-prices.output-dir}") String outputDir,
-                            BackupService backupService) {
+                            BackupService backupService,
+                            ExcelHelper excelHelper) {
         return new StepBuilder("ProcessFileStep", jobRepository)
                 .<BrazilianBondPrice, BrazilianBondPrice>chunk(1000, this.transactionManager)
                 .reader(new BrazilianBondPricesCsvReader(fileContent, fileName))
-                .writer(new BrazilianBondPricesExcelWriter(backupService, referenceDate, outputDir))
+                .writer(new BrazilianBondPricesExcelWriter(backupService, excelHelper, referenceDate, outputDir))
                 .build();
     }
 }

@@ -2,145 +2,46 @@ package ludo.mentis.aciem.mdc.writer;
 
 import ludo.mentis.aciem.mdc.model.BrazilianBondPrice;
 import ludo.mentis.aciem.mdc.service.BackupService;
-import org.apache.poi.ss.SpreadsheetVersion;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.AreaReference;
-import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ludo.mentis.aciem.mdc.util.ExcelHelper;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.batch.item.Chunk;
-import org.springframework.batch.item.ItemWriter;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 
-public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondPrice> {
+public class BrazilianBondPricesExcelWriter extends BaseExcelItemWriter<BrazilianBondPrice> {
     private static final String SHEET_NAME = "Anbima";
-    private static final String AUDIT_SHEET_NAME = "Audit";
     private static final String TABLE_NAME = "Tb_Anbima";
     private static final String TABLE_STYLE = "TableStyleMedium2";
     private static final String FILE_NAME = "BrazilianBondPrices.xlsx";
     private static final String[] COLUMN_HEADERS = {
-            "Titulo", "Data Referencia", "Codigo SELIC", "Data Base/Emissao",
+            "Título", "Data Referência", "Código SELIC", "Data Base/Emissão",
             "Data Vencimento", "Tx. Compra", "Tx. Venda", "Tx. Indicativas", "PU",
-            "Desvio padrao", "Interv. Ind. Inf. (D0)", "Interv. Ind. Sup. (D0)",
-            "Interv. Ind. Inf. (D+1)", "Interv. Ind. Sup. (D+1)", "Criterio"
+            "Desvio Padrão", "Interv. Ind. Inf. (D0)", "Interv. Ind. Sup. (D0)",
+            "Interv. Ind. Inf. (D+1)", "Interv. Ind. Sup. (D+1)", "Critério"
     };
 
-    private final Path outputPath;
     private final Workbook workbook;
     private final Sheet sheet;
-    private final ExcelHelper excelHelper;
-    private final LocalDate referenceDate;
     private int currentRow = 1;
-    private final Logger log = LoggerFactory.getLogger(BrazilianBondPricesExcelWriter.class);
 
-    public BrazilianBondPricesExcelWriter(BackupService backupService, LocalDate referenceDate, String outputDir) {
-        this.referenceDate = referenceDate;
-        this.outputPath = Paths.get(outputDir, FILE_NAME);
-        this.workbook = initializeWorkbook(backupService, referenceDate);
-        this.sheet = createSheet();
-        this.excelHelper = new ExcelHelper(sheet);
-        writeHeader();
-        createAuditSheet();
-    }
-
-    private void createAuditSheet() {
-        Sheet auditSheet = workbook.createSheet(AUDIT_SHEET_NAME);
-
-        // Create rows for audit information
-        Row titleRow = auditSheet.createRow(0);
-        Cell titleCell = titleRow.createCell(0);
-        titleCell.setCellValue("Brazilian Bond Prices - Audit Information");
-
-        // Reference date
-        Row dateRow = auditSheet.createRow(2);
-        Cell dateLabelCell = dateRow.createCell(0);
-        dateLabelCell.setCellValue("Reference Date:");
-        Cell dateValueCell = dateRow.createCell(1);
-        excelHelper.setCellValue(dateRow, 1, referenceDate);
-
-        // Creation timestamp
-        Row timestampRow = auditSheet.createRow(3);
-        Cell timestampLabelCell = timestampRow.createCell(0);
-        timestampLabelCell.setCellValue("Created At:");
-
-        // Create a timestamp cell with date formatting
-        Cell timestampValueCell = timestampRow.createCell(1);
-        Date now = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
-        timestampValueCell.setCellValue(now);
-        timestampValueCell.setCellStyle(excelHelper.getDateCellStyle());
-
-        // User information
-        Row userRow = auditSheet.createRow(4);
-        Cell userLabelCell = userRow.createCell(0);
-        userLabelCell.setCellValue("Created By:");
-        Cell userValueCell = userRow.createCell(1);
-        userValueCell.setCellValue(System.getProperty("user.name"));
-
-        // Auto-size columns
-        auditSheet.autoSizeColumn(0);
-        auditSheet.autoSizeColumn(1);
-    }
-
-    private Workbook initializeWorkbook(BackupService backupService, LocalDate referenceDate) {
-        handleBackup(backupService, referenceDate);
-        try {
-            if (Files.exists(outputPath)) {
-                var wb = WorkbookFactory.create(Files.newInputStream(outputPath));
-                removeExistingSheet(wb);
-                return wb;
-            }
-            return new XSSFWorkbook();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private void handleBackup(BackupService backupService, LocalDate referenceDate) {
-        if (outputPath.toFile().exists()) {
-            try {
-                backupService.backup(outputPath.toString());
-            } catch (Exception ex) {
-                log.error("[{}] Could not backup existing file: {}", referenceDate, outputPath, ex);
-            }
-        }
-    }
-
-    private void removeExistingSheet(Workbook workbook) {
-        var index = workbook.getSheetIndex(SHEET_NAME);
-        if (index >= 0) {
-            workbook.removeSheetAt(index);
-        }
-    }
-
-    private Sheet createSheet() {
-        return workbook.createSheet(SHEET_NAME);
-    }
-
-    private void writeHeader() {
-        var header = sheet.createRow(0);
-        for (var i = 0; i < COLUMN_HEADERS.length; i++) {
-            header.createCell(i).setCellValue(COLUMN_HEADERS[i]);
-        }
+    public BrazilianBondPricesExcelWriter(BackupService backupService, ExcelHelper excelHelper, LocalDate referenceDate, String outputDir) {
+        super(backupService, excelHelper, LocalDate.now(), outputDir, FILE_NAME);
+        this.workbook = this.initializeWorkbook(SHEET_NAME);
+        this.sheet = workbook.createSheet(SHEET_NAME);
+        this.excelHelper.init(this.sheet);
+        this.writeHeader(this.sheet, COLUMN_HEADERS);
+        this.createAuditSheet(this.workbook, "Brazilian Bond Prices - Audit Information", referenceDate);
     }
 
     @Override
     public void write(Chunk<? extends BrazilianBondPrice> chunk) throws Exception {
         for (var item : chunk) {
-            writeRow(item);
+            this.writeRow(item);
         }
-        finalizeSheet();
-        saveWorkbook();
+        this.autosizeColumns(sheet, COLUMN_HEADERS);
+        this.createTable(sheet, COLUMN_HEADERS, TABLE_NAME, TABLE_STYLE);
+        this.saveWorkbook(this.workbook);
     }
 
     private void writeRow(BrazilianBondPrice item) {
@@ -160,72 +61,5 @@ public class BrazilianBondPricesExcelWriter implements ItemWriter<BrazilianBondP
         excelHelper.setCellValue(row, 12, item.getLowerIntervalD1());
         excelHelper.setCellValue(row, 13, item.getUpperIntervalD1());
         excelHelper.setCellValue(row, 14, item.getCriteria());
-    }
-
-    private void finalizeSheet() {
-        for (var i = 0; i < COLUMN_HEADERS.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
-        createTable();
-    }
-
-    private void createTable() {
-        var area = new AreaReference(
-                new CellReference(0, 0),
-                new CellReference(sheet.getLastRowNum(), COLUMN_HEADERS.length - 1),
-                SpreadsheetVersion.EXCEL2007
-        );
-        var xssfSheet = (XSSFSheet) sheet;
-        var table = xssfSheet.createTable(area);
-        table.setName(TABLE_NAME);
-        table.setStyleName(TABLE_STYLE);
-    }
-
-    private void saveWorkbook() throws IOException {
-        try (var out = Files.newOutputStream(outputPath)) {
-            workbook.write(out);
-        }
-        workbook.close();
-    }
-
-    private static class ExcelHelper {
-        private final Sheet sheet;
-        private final CellStyle dateCellStyle;
-
-        ExcelHelper(Sheet sheet) {
-            this.sheet = sheet;
-            this.dateCellStyle = createDateCellStyle(sheet.getWorkbook());
-        }
-
-        private CellStyle createDateCellStyle(Workbook workbook) {
-            CellStyle cellStyle = workbook.createCellStyle();
-            CreationHelper createHelper = workbook.getCreationHelper();
-            cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/MM/yyyy"));
-            return cellStyle;
-        }
-
-        CellStyle getDateCellStyle() {
-            return dateCellStyle;
-        }
-
-        void setCellValue(Row row, int column, String value) {
-            if (value != null) {
-                row.createCell(column).setCellValue(value);
-            }
-        }
-
-        void setCellValue(Row row, int column, LocalDate value) {
-            if (value != null) {
-                Cell cell = row.createCell(column);
-                cell.setCellValue(Date.from(value.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-                cell.setCellStyle(dateCellStyle);
-            }
-        }
-
-        void setCellValue(Row row, int column, Number value) {
-            if (value != null) {
-                row.createCell(column).setCellValue(value.doubleValue());
-            }
-        }
     }
 }

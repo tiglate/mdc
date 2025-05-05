@@ -5,6 +5,7 @@ import ludo.mentis.aciem.mdc.reader.FinancialIndicatorJsonReader;
 import ludo.mentis.aciem.mdc.service.BackupService;
 import ludo.mentis.aciem.mdc.service.FileDownloadService;
 import ludo.mentis.aciem.mdc.tasklet.FinancialIndicatorDownloader;
+import ludo.mentis.aciem.mdc.util.ExcelHelper;
 import ludo.mentis.aciem.mdc.writer.FinancialIndicatorExcelWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -52,11 +53,12 @@ public class FinancialIndicatorsJobConfig {
     @JobScope
     Step processFileStepFI(@Value("#{jobExecutionContext['fileContent']}") byte[] fileContent,
                            @Value("${financial-indicators.output-dir}") String outputDir,
-                           BackupService backupService) {
+                           BackupService backupService,
+                           ExcelHelper excelHelper) {
         return new StepBuilder("ProcessFileStep", jobRepository)
                 .<FinancialIndicator, FinancialIndicator>chunk(1000, this.transactionManager)
                 .reader(new FinancialIndicatorJsonReader(fileContent))
-                .writer(new FinancialIndicatorExcelWriter(backupService, outputDir))
+                .writer(new FinancialIndicatorExcelWriter(backupService, excelHelper, outputDir))
                 .build();
     }
 }
