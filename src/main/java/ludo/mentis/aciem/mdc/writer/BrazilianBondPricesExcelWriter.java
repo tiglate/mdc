@@ -44,7 +44,7 @@ public class BrazilianBondPricesExcelWriter extends BaseExcelItemWriter<Brazilia
         this.saveWorkbook(this.workbook);
     }
 
-    private void writeRow(BrazilianBondPrice item) {
+    protected void writeRow(BrazilianBondPrice item) {
         var row = sheet.createRow(currentRow++);
         excelHelper.setCellValue(row, 0, item.getTitle());
         excelHelper.setCellValue(row, 1, item.getReferenceDate());

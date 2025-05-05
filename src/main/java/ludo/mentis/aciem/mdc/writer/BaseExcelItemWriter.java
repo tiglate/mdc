@@ -44,7 +44,7 @@ public abstract class BaseExcelItemWriter<T> implements ItemWriter<T> {
         try {
             if (Files.exists(outputPath)) {
                 var workbook = WorkbookFactory.create(Files.newInputStream(outputPath));
-                if (workbook.getSheet(sheetName) == null) {
+                if (sheetName != null && workbook.getSheet(sheetName) != null) {
                     removeExistingSheet(workbook, sheetName);
                 }
                 return workbook;

@@ -41,7 +41,7 @@ public class FinancialIndicatorExcelWriter extends BaseExcelItemWriter<Financial
         this.saveWorkbook(this.workbook);
     }
 
-    private void writeRow(FinancialIndicator item) {
+    protected void writeRow(FinancialIndicator item) {
         var row = sheet.createRow(currentRow++);
         excelHelper.setCellValue(row, 0, item.getSecurityIdentificationCode());
         excelHelper.setCellValue(row, 1, item.getGroupDescription());
