@@ -42,7 +42,7 @@ public class UpdatedNominalValueDownloader implements Tasklet {
         
         var file = fileDownloadService.downloadFile(new URL(this.fileUrl), HttpMethod.POST, parameters);
 
-        jobContext.put("fileContent", file.getContentAsByteArray());
+        jobContext.put("fileContent", file != null ? file.getContentAsByteArray() : new byte[] {});
         jobContext.put("referenceDate", this.referenceDate);
 
         return RepeatStatus.FINISHED;
