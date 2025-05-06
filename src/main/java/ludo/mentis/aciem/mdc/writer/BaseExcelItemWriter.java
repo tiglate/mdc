@@ -110,6 +110,7 @@ public abstract class BaseExcelItemWriter<T> implements ItemWriter<T> {
         var xssfSheet = (XSSFSheet) sheet;
         var table = xssfSheet.createTable(area);
         table.setName(tableName);
+        table.setDisplayName(tableName);
         table.setStyleName(tableStyle);
     }
 
