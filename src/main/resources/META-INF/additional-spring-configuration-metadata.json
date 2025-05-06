@@ -47,7 +47,7 @@
     {
       "name": "exchange-rate-parity.output-dir",
       "type": "java.lang.String",
-      "description": "Output directory for exchange rate parity data files."
+      "description": "Output directory for exchange rate parity spreadsheet."
     },
     {
       "name": "financial-indicators.download-url",
@@ -57,7 +57,7 @@
     {
       "name": "financial-indicators.output-dir",
       "type": "java.lang.String",
-      "description": "Output directory for financial indicators data files."
+      "description": "Output directory for financial indicators spreadsheet."
     },
     {
       "name": "brazilian-bond-prices.download-base-url",
@@ -67,7 +67,7 @@
     {
       "name": "brazilian-bond-prices.output-dir",
       "type": "java.lang.String",
-      "description": "Output directory for Brazilian bond prices data files."
+      "description": "Output directory for Brazilian bond prices spreadsheet."
     },
     {
       "name": "interest-rate-curve.download-url",
@@ -77,7 +77,7 @@
     {
       "name": "interest-rate-curve.output-dir",
       "type": "java.lang.String",
-      "description": "Output directory for interest rate curves data files."
+      "description": "Output directory for interest rate curves spreadsheet."
     },
     {
       "name": "ptax.download-url",
@@ -87,12 +87,22 @@
     {
       "name": "ptax.output-dir",
       "type": "java.lang.String",
-      "description": "Output directory for PTAX data files."
+      "description": "Output directory for PTAX spreadsheet."
     },
     {
       "name": "file-downloader.http-client.proxy.enabled",
       "type": "java.lang.String",
       "description": "Enable/disable proxy for HTTP client."
+    },
+    {
+      "name": "updated-nominal-values.download-url",
+      "type": "java.lang.String",
+      "description": "URL for downloading the updated nominal values."
+    },
+    {
+      "name": "updated-nominal-values.output-dir",
+      "type": "java.lang.String",
+      "description": "Output directory for the updated nominal spreadsheet."
     }
   ],
   "hints": [
