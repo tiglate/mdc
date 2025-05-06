@@ -1,0 +1,134 @@
+{
+  "properties": [
+    {
+      "name": "file-downloader.http-client.connect-timeout-seconds",
+      "type": "java.lang.Integer",
+      "description": "Connection timeout in seconds for HTTP client.",
+      "defaultValue": 20
+    },
+    {
+      "name": "file-downloader.http-client.request-timeout-minutes",
+      "type": "java.lang.Integer",
+      "description": "Request timeout in minutes for HTTP client.",
+      "defaultValue": 5
+    },
+    {
+      "name": "file-downloader.http-client.file-request-timeout-minutes",
+      "type": "java.lang.Integer",
+      "description": "File request timeout in minutes for HTTP client.",
+      "defaultValue": 30
+    },
+    {
+      "name": "file-downloader.http-client.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether the HTTP client is enabled.",
+      "defaultValue": true
+    },
+    {
+      "name": "file-downloader.http-client.ssl.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether SSL is enabled for HTTP client."
+    },
+    {
+      "name": "file-downloader.http-client.proxy.host",
+      "type": "java.lang.String",
+      "description": "Proxy host for HTTP client."
+    },
+    {
+      "name": "file-downloader.http-client.proxy.port",
+      "type": "java.lang.Integer",
+      "description": "Proxy port for HTTP client."
+    },
+    {
+      "name": "exchange-rate-parity.download-url",
+      "type": "java.lang.String",
+      "description": "Base URL for downloading exchange rate parity data."
+    },
+    {
+      "name": "exchange-rate-parity.output-dir",
+      "type": "java.lang.String",
+      "description": "Output directory for exchange rate parity data files."
+    },
+    {
+      "name": "financial-indicators.download-url",
+      "type": "java.lang.String",
+      "description": "URL for downloading financial indicators data."
+    },
+    {
+      "name": "financial-indicators.output-dir",
+      "type": "java.lang.String",
+      "description": "Output directory for financial indicators data files."
+    },
+    {
+      "name": "brazilian-bond-prices.download-base-url",
+      "type": "java.lang.String",
+      "description": "Base URL for downloading Brazilian bond prices data."
+    },
+    {
+      "name": "brazilian-bond-prices.output-dir",
+      "type": "java.lang.String",
+      "description": "Output directory for Brazilian bond prices data files."
+    },
+    {
+      "name": "interest-rate-curve.download-url",
+      "type": "java.lang.String",
+      "description": "URL for downloading interest rate curves data."
+    },
+    {
+      "name": "interest-rate-curve.output-dir",
+      "type": "java.lang.String",
+      "description": "Output directory for interest rate curves data files."
+    },
+    {
+      "name": "ptax.download-url",
+      "type": "java.lang.String",
+      "description": "Base URL for downloading PTAX data."
+    },
+    {
+      "name": "ptax.output-dir",
+      "type": "java.lang.String",
+      "description": "Output directory for PTAX data files."
+    },
+    {
+      "name": "file-downloader.http-client.proxy.enabled",
+      "type": "java.lang.String",
+      "description": "Enable/disable proxy for HTTP client."
+    }
+  ],
+  "hints": [
+    {
+      "name": "file-downloader.http-client.connect-timeout-seconds",
+      "values": [
+        {
+          "value": 10,
+          "description": "Fast timeout (10 seconds)"
+        },
+        {
+          "value": 20,
+          "description": "Default timeout (20 seconds)"
+        },
+        {
+          "value": 60,
+          "description": "Extended timeout (60 seconds)"
+        }
+      ]
+    },
+    {
+      "name": "file-downloader.http-client.request-timeout-minutes",
+      "values": [
+        {
+          "value": 1,
+          "description": "Fast timeout (1 minute)"
+        },
+        {
+          "value": 5,
+          "description": "Default timeout (5 minutes)"
+        },
+        {
+          "value": 10,
+          "description": "Extended timeout (10 minutes)"
+        }
+      ]
+    }
+  ]
+}
