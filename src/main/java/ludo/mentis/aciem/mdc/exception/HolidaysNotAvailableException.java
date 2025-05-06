@@ -1,5 +1,8 @@
 package ludo.mentis.aciem.mdc.exception;
 
+import org.springframework.aot.generate.Generated;
+
+@Generated
 public class HolidaysNotAvailableException extends Exception {
 	
 	private static final long serialVersionUID = 758382081049882056L;

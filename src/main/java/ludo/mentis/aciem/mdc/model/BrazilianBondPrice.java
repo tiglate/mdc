@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import org.springframework.aot.generate.Generated;
+
+@Generated
 public class BrazilianBondPrice {
     private String title;
     private LocalDate referenceDate;

@@ -6,6 +6,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.springframework.aot.generate.Generated;
+
+@Generated
 public class Ptax {
     @JsonProperty("cotacaoCompra")
     private BigDecimal buyValue;

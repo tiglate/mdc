@@ -1,9 +1,12 @@
 package ludo.mentis.aciem.mdc.exception;
 
+import org.springframework.aot.generate.Generated;
+
 /**
  * Checked exception thrown when there is an error loading holiday data.
  * This exception wraps lower-level exceptions that may occur during the holiday loading process.
  */
+@Generated
 public class HolidayLoadException extends Exception {
 
 	private static final long serialVersionUID = 6090794116698802359L;
