@@ -1,22 +1,28 @@
 package ludo.mentis.aciem.mdc.service;
 
-import ludo.mentis.aciem.mdc.config.HttpClientProperties;
-import ludo.mentis.aciem.mdc.exception.DownloadException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
+import ludo.mentis.aciem.mdc.config.HttpClientProperties;
+import ludo.mentis.aciem.mdc.exception.DownloadException;
+import ludo.mentis.aciem.mdc.model.HttpMethod;
 
 @Service
 public class HttpClientFileDownloadService implements FileDownloadService {
@@ -32,11 +38,23 @@ public class HttpClientFileDownloadService implements FileDownloadService {
         this.properties = properties;
         log.info("HttpClientFileDownloadService initialized.");
     }
-
+    
     @Override
     public Resource downloadFile(URL url) throws DownloadException, InterruptedException {
-        var request = createHttpRequest(url, Duration.ofMinutes(properties.getRequestTimeoutMinutes()));
-        log.info("Sending request to download URL (to memory): {}", url);
+        return downloadFile(url, HttpMethod.GET, null);
+    }
+
+    @Override
+    public void downloadFile(URL url, Path destinationPath) throws DownloadException, InterruptedException {
+        downloadFile(url, HttpMethod.GET, null, destinationPath);
+    }
+
+    @Override
+    public Resource downloadFile(URL url, HttpMethod method, Map<String, String> parameters) 
+            throws DownloadException, InterruptedException {
+        var request = createHttpRequest(url, method, parameters, 
+                Duration.ofMinutes(properties.getRequestTimeoutMinutes()));
+        log.info("Sending {} request to download URL (to memory): {}", method, url);
 
         try {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
@@ -56,11 +74,13 @@ public class HttpClientFileDownloadService implements FileDownloadService {
     }
 
     @Override
-    public void downloadFile(URL url, Path destinationPath) throws DownloadException, InterruptedException {
-        var request = createHttpRequest(url, Duration.ofMinutes(properties.getFileRequestTimeoutMinutes()));
+    public void downloadFile(URL url, HttpMethod method, Map<String, String> parameters, Path destinationPath) 
+            throws DownloadException, InterruptedException {
+        var request = createHttpRequest(url, method, parameters, 
+                Duration.ofMinutes(properties.getFileRequestTimeoutMinutes()));
         ensureDirectoryExists(destinationPath);
 
-        log.info("Sending request to download URL: {} to Path: {}", url, destinationPath);
+        log.info("Sending {} request to download URL: {} to Path: {}", method, url, destinationPath);
         try {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofFile(destinationPath));
             validateResponse(response, url, destinationPath);
@@ -71,18 +91,60 @@ public class HttpClientFileDownloadService implements FileDownloadService {
     }
 
     protected HttpRequest createHttpRequest(URL url, Duration timeout) throws DownloadException {
+        return createHttpRequest(url, HttpMethod.GET, null, timeout);
+    }
+
+    protected HttpRequest createHttpRequest(URL url, HttpMethod method, Map<String, String> parameters, Duration timeout) 
+            throws DownloadException {
         if (url == null) {
             throw new IllegalArgumentException("URL cannot be null");
         }
+        
         try {
-            return HttpRequest.newBuilder()
-                    .uri(url.toURI())
-                    .GET()
-                    .timeout(timeout)
-                    .build();
+            URI uri = url.toURI();
+            
+            // Handle GET with parameters by appending query string
+            if (method == HttpMethod.GET && parameters != null && !parameters.isEmpty()) {
+                String queryParams = buildQueryString(parameters);
+                String originalUri = uri.toString();
+                String separator = originalUri.contains("?") ? "&" : "?";
+                uri = new URI(originalUri + separator + queryParams);
+            }
+            
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .timeout(timeout);
+            
+            // Handle POST with parameters by setting form body
+            if (method == HttpMethod.POST && parameters != null && !parameters.isEmpty()) {
+                String formData = buildQueryString(parameters);
+                requestBuilder.header("Content-Type", "application/x-www-form-urlencoded")
+                             .POST(HttpRequest.BodyPublishers.ofString(formData));
+            } else if (method == HttpMethod.POST) {
+                // POST with no parameters
+                requestBuilder.POST(HttpRequest.BodyPublishers.noBody());
+            } else {
+                // Default to GET
+                requestBuilder.GET();
+            }
+            
+            return requestBuilder.build();
         } catch (URISyntaxException e) {
             throw new DownloadException("Invalid URL syntax: " + url, e);
         }
+    }
+
+    private String buildQueryString(Map<String, String> parameters) {
+        return parameters.entrySet().stream()
+                .map(entry -> encodeParameter(entry.getKey()) + "=" + encodeParameter(entry.getValue()))
+                .collect(Collectors.joining("&"));
+    }
+    
+    private String encodeParameter(String value) {
+        if (value == null) {
+            return "";
+        }
+        return java.net.URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     protected void validateResponse(HttpResponse<?> response, URL url, Path destinationPath) throws DownloadException {
