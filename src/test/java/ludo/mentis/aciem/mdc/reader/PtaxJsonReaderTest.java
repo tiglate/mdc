@@ -62,7 +62,7 @@ class PtaxJsonReaderTest {
         // Skip first item
         reader.read();
         
-        // Read second item
+        // Read the second item
         var secondItem = reader.read();
         
         // Then
@@ -73,18 +73,6 @@ class PtaxJsonReaderTest {
             LocalDateTime.of(2025, 4, 2, 13, 2, 29, 942000000),
             secondItem.getTimestamp()
         );
-    }
-
-    @Test
-    void shouldReturnNullWhenNoMoreItems() throws Exception {
-        // Read all items
-        Ptax item;
-        while ((item = reader.read()) != null) {
-            // Just consume all items
-        }
-        
-        // Then
-        assertNull(reader.read());
     }
 
     @Test

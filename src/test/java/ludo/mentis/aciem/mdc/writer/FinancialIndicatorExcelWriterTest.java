@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.batch.item.Chunk;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +38,7 @@ class FinancialIndicatorExcelWriterTest {
     private Path outputPath;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         writer = new FinancialIndicatorExcelWriter(backupService, excelHelper, tempDir.toString());
         outputPath = tempDir.resolve("FinancialIndicators.xlsx");
