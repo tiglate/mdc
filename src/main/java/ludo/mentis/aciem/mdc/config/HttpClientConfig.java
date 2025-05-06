@@ -29,7 +29,7 @@ public class HttpClientConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpClientConfig.class);
 
     @Bean
-    public HttpClient httpClient(HttpClientProperties properties) {
+    HttpClient httpClient(HttpClientProperties properties) {
         log.info("Configuring custom HttpClient bean...");
         properties.getProxy().validate();
         try {

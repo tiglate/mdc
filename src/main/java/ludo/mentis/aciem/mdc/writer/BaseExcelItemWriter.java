@@ -121,6 +121,9 @@ public abstract class BaseExcelItemWriter<T> implements ItemWriter<T> {
     }
 
     protected void saveWorkbook(Workbook workbook) throws IOException {
+    	if (!Files.exists(this.outputPath.getParent())) {
+            Files.createDirectories(this.outputPath.getParent());
+        }
         try (var out = Files.newOutputStream(this.outputPath)) {
             workbook.write(out);
         }

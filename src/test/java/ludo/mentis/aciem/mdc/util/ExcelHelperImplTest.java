@@ -2,7 +2,9 @@ package ludo.mentis.aciem.mdc.util;
 
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,12 +20,18 @@ class ExcelHelperImplTest {
 
     private ExcelHelperImpl excelHelper;
     private Sheet sheet;
+    private Workbook workbook;
 
     @BeforeEach
     void setUp() {
-        excelHelper = new ExcelHelperImpl();
-        var workbook = new XSSFWorkbook();
-        sheet = workbook.createSheet("Test Sheet");
+        this.excelHelper = new ExcelHelperImpl();
+        this.workbook = new XSSFWorkbook();
+        this.sheet = workbook.createSheet("Test Sheet");
+    }
+    
+    @AfterEach
+    void tearDown() throws Exception {
+        workbook.close();
     }
 
     @Test

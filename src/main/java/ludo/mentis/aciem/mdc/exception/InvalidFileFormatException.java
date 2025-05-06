@@ -6,7 +6,9 @@ package ludo.mentis.aciem.mdc.exception;
  */
 public class InvalidFileFormatException extends Exception {
 
-    /**
+	private static final long serialVersionUID = -411975825191539596L;
+
+	/**
      * Constructs a new InvalidFileFormatException with the specified detail message.
      *
      * @param message the detail message

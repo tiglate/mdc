@@ -6,7 +6,9 @@ package ludo.mentis.aciem.mdc.exception;
  */
 public class HolidayLoadException extends Exception {
 
-    /**
+	private static final long serialVersionUID = 6090794116698802359L;
+
+	/**
      * Constructs a new HolidayLoadException with the specified detail message.
      *
      * @param message the detail message

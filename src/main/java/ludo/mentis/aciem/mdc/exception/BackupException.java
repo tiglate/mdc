@@ -7,7 +7,9 @@ package ludo.mentis.aciem.mdc.exception;
  */
 public class BackupException extends RuntimeException {
 
-    /**
+	private static final long serialVersionUID = -1678445165889158840L;
+
+	/**
      * Constructs a new BackupException with the specified detail message.
      *
      * @param message the detail message describing the reason for the backup failure

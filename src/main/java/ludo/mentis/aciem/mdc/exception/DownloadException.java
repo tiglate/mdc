@@ -3,7 +3,10 @@ package ludo.mentis.aciem.mdc.exception;
 import java.io.IOException;
 
 public class DownloadException extends IOException {
-    public DownloadException(String message) {
+	
+	private static final long serialVersionUID = 1164262395570561521L;
+
+	public DownloadException(String message) {
         super(message);
     }
 
