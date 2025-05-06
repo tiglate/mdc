@@ -17,6 +17,7 @@ public class Ptax {
     private LocalDateTime timestamp;
 
     public Ptax() {
+        // Required by Jackson for deserialization
     }
 
     public BigDecimal getBuyValue() {

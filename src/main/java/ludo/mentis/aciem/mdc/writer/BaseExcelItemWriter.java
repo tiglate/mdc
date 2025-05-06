@@ -1,5 +1,6 @@
 package ludo.mentis.aciem.mdc.writer;
 
+import ludo.mentis.aciem.mdc.exception.BackupException;
 import ludo.mentis.aciem.mdc.service.BackupService;
 import ludo.mentis.aciem.mdc.util.ExcelHelper;
 import org.apache.poi.ss.SpreadsheetVersion;
@@ -60,7 +61,7 @@ public abstract class BaseExcelItemWriter<T> implements ItemWriter<T> {
             try {
                 backupService.backup(outputPath.toString());
             } catch (Exception ex) {
-                throw new RuntimeException("Could not backup existing file: " + outputPath, ex);
+                throw new BackupException("Could not backup existing file: " + outputPath, ex);
             }
         }
     }

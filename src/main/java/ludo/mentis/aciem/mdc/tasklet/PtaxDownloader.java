@@ -18,7 +18,7 @@ public class PtaxDownloader implements Tasklet {
 
     public PtaxDownloader(FileDownloadService fileDownloadService, String serviceUrl) {
         this.fileDownloadService = fileDownloadService;
-        this.serviceUrl = this.constructDownloadUrl(serviceUrl);
+        this.serviceUrl = constructDownloadUrl(serviceUrl);
     }
 
     @Override

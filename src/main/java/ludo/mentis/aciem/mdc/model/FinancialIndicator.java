@@ -14,6 +14,7 @@ public class FinancialIndicator {
     private LocalDate lastUpdate;
 
     public FinancialIndicator() {
+        // Required by Jackson for deserialization
     }
 
     public Long getSecurityIdentificationCode() {
