@@ -86,10 +86,10 @@ java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=Ptax
 ### Running with a specific reference date (for BrazilianBondPrices)
 ```bash
 # Using Maven
-mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=BrazilianBondPrices,referenceDate=2023-06-30"
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=BrazilianBondPrices,referenceDate=2025-04-30"
 
 # Using the JAR file
-java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=BrazilianBondPrices --referenceDate=2023-06-30
+java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=BrazilianBondPrices referenceDate=2025-04-30
 ```
 
 ## 📁 Output
