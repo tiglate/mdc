@@ -24,7 +24,7 @@ public class TradingAdjustmentsDownloader implements Tasklet {
 	public TradingAdjustmentsDownloader(FileDownloadService fileDownloadService, LocalDate referenceDate,
 			String fileUrl) {
 		this.fileUrl = fileUrl;
-		this.referenceDate = referenceDate;
+		this.referenceDate = referenceDate != null ? referenceDate : LocalDate.now();
 		this.fileDownloadService = fileDownloadService;
 	}
 

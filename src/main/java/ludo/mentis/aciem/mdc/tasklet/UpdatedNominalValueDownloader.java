@@ -24,7 +24,7 @@ public class UpdatedNominalValueDownloader implements Tasklet {
 	public UpdatedNominalValueDownloader(FileDownloadService fileDownloadService, LocalDate referenceDate,
 			String fileUrl) {
 		this.fileUrl = fileUrl;
-		this.referenceDate = referenceDate;
+		this.referenceDate = referenceDate != null? referenceDate : LocalDate.now();
 		this.fileDownloadService = fileDownloadService;
 	}
 
