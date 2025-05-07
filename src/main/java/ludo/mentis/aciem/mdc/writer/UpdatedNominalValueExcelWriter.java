@@ -15,7 +15,7 @@ public class UpdatedNominalValueExcelWriter extends BaseExcelItemWriter<UpdatedN
     private static final String TABLE_STYLE = "TableStyleMedium2";
     private static final String FILE_NAME = "UpdatedNominalValue.xlsx";
     private static final String[] COLUMN_HEADERS = {
-            "ReferenceDate", "Security", "SELIC Code", "VNA", "Index",
+            "Reference Date", "Security", "SELIC Code", "VNA", "Index",
             "Reference", "Valid Since"
     };
 

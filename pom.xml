@@ -28,6 +28,7 @@
     </scm>
     <properties>
         <java.version>17</java.version>
+        <maven.compiler.release>17</maven.compiler.release>
         <jackson.version>2.19.0</jackson.version>
         <apache-poi.version>5.4.1</apache-poi.version>
         <sonar.organization>ampliar-project</sonar.organization>
@@ -75,6 +76,11 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version><!--$NO-MVN-MAN-VER$-->
         </dependency>
+		<dependency>
+		    <groupId>org.jsoup</groupId>
+		    <artifactId>jsoup</artifactId>
+		    <version>1.17.2</version>
+	    </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

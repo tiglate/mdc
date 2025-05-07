@@ -1,9 +1,12 @@
 package ludo.mentis.aciem.mdc.exception;
 
+import org.springframework.aot.generate.Generated;
+
 /**
  * Exception thrown when a file has an invalid format.
  * This is used when parsing files that don't conform to the expected structure.
  */
+@Generated
 public class InvalidFileFormatException extends Exception {
 
 	private static final long serialVersionUID = -411975825191539596L;
