@@ -1,54 +1,52 @@
 package ludo.mentis.aciem.mdc.tasklet;
 
 import ludo.mentis.aciem.mdc.service.FileDownloadService;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.lang.NonNull;
+import org.springframework.batch.item.ExecutionContext;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class ExchangeRateParityDownloader implements Tasklet {
+public class ExchangeRateParityDownloader extends BaseDownloaderTasklet {
 
     private static final DateTimeFormatter FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private final String baseUrl;
-    private final LocalDate referenceDate;
-    private final FileDownloadService fileDownloadService;
 
     public ExchangeRateParityDownloader(FileDownloadService fileDownloadService, LocalDate referenceDate,
                                          String baseUrl) {
-        this.fileDownloadService = fileDownloadService;
-        this.referenceDate = referenceDate != null ? referenceDate : LocalDate.now();
+        super(fileDownloadService, referenceDate);
         this.baseUrl = baseUrl;
     }
 
     @Override
-    public RepeatStatus execute(@NonNull StepContribution contribution, @NonNull ChunkContext chunkContext)
-            throws Exception {
-        var fileName = this.referenceDate.format(FILE_DATE_FORMATTER) + ".csv";
-        var fileUrl = new URL(this.baseUrl + fileName);
+    protected URL getFileUrl() throws MalformedURLException {
+        String fileName = getFileName();
+        return new URL(this.baseUrl + fileName);
+    }
 
-        var jobContext = contribution.getStepExecution()
-                .getJobExecution()
-                .getExecutionContext();
+    @Override
+    protected String getFileNullErrorMessage() {
+        String fileName = getFileName();
+        return "Downloaded file '%s' is null".formatted(fileName);
+    }
 
-        var fileResource = fileDownloadService.downloadFile(fileUrl);
-        if (fileResource == null) {
-            throw new IllegalStateException("Downloaded file '" + fileName + "' is null");
-        }
-        var fileContent = fileResource.getContentAsByteArray();
-        if (fileContent.length == 0) {
-            throw new IllegalStateException("Downloaded file '" + fileName + "' is empty");
-        }
+    @Override
+    protected String getFileEmptyErrorMessage() {
+        String fileName = getFileName();
+        return "Downloaded file '%s' is empty".formatted(fileName);
+    }
 
+    @Override
+    protected void putAdditionalDataInContext(ExecutionContext jobContext, byte[] fileContent) {
+        super.putAdditionalDataInContext(jobContext, fileContent);
+        String fileName = getFileName();
         jobContext.put("fileName", fileName);
-        jobContext.put("fileContent", fileContent);
-        jobContext.put("referenceDate", this.referenceDate);
+    }
 
-        return RepeatStatus.FINISHED;
+    private String getFileName() {
+        assert this.referenceDate != null;
+        return this.referenceDate.format(FILE_DATE_FORMATTER) + ".csv";
     }
 }
