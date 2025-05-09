@@ -27,7 +27,16 @@ public class FinancialIndicatorDownloader implements Tasklet {
                 .getJobExecution()
                 .getExecutionContext();
 
-        jobContext.put("fileContent", fileDownloadService.downloadFile(fileUrl).getContentAsByteArray());
+        var fileResource = fileDownloadService.downloadFile(fileUrl);
+        if (fileResource == null) {
+            throw new IllegalStateException("Downloaded file is null");
+        }
+        var fileContent = fileResource.getContentAsByteArray();
+        if (fileContent.length == 0) {
+            throw new IllegalStateException("Downloaded file is empty");
+        }
+
+        jobContext.put("fileContent", fileContent);
 
         return RepeatStatus.FINISHED;
     }

@@ -38,9 +38,16 @@ public class TradingAdjustmentsDownloader implements Tasklet {
         var parameters = new HashMap<String, String>();
         parameters.put("dData1", this.referenceDate.format(FILE_DATE_FORMATTER));
 
-        var file = fileDownloadService.downloadFile(new URL(this.fileUrl), HttpMethod.POST, parameters);
+        var fileResource = fileDownloadService.downloadFile(new URL(this.fileUrl), HttpMethod.POST, parameters);
+        if (fileResource == null) {
+            throw new IllegalStateException("Downloaded file is null");
+        }
+        var fileContent = fileResource.getContentAsByteArray();
+        if (fileContent.length == 0) {
+            throw new IllegalStateException("Downloaded file is empty");
+        }
 
-        jobContext.put("fileContent", file != null ? file.getContentAsByteArray() : new byte[] {});
+        jobContext.put("fileContent", fileContent);
         jobContext.put("referenceDate", this.referenceDate);
 
         return RepeatStatus.FINISHED;

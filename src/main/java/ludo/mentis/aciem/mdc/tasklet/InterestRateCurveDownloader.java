@@ -39,10 +39,17 @@ public class InterestRateCurveDownloader implements Tasklet {
         parameters.put("Dt_Ref", this.referenceDate.format(FILE_DATE_FORMATTER));
         parameters.put("Idioma", "US");
         parameters.put("saida", "csv");
-        
-        var file = fileDownloadService.downloadFile(new URL(this.fileUrl), HttpMethod.POST, parameters);
 
-        jobContext.put("fileContent", file.getContentAsByteArray());
+        var fileResource = fileDownloadService.downloadFile(new URL(this.fileUrl), HttpMethod.POST, parameters);
+        if (fileResource == null) {
+            throw new IllegalStateException("Downloaded file is null");
+        }
+        var fileContent = fileResource.getContentAsByteArray();
+        if (fileContent.length == 0) {
+            throw new IllegalStateException("Downloaded file is empty");
+        }
+
+        jobContext.put("fileContent", fileContent);
         jobContext.put("referenceDate", this.referenceDate);
 
         return RepeatStatus.FINISHED;

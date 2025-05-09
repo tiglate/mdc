@@ -40,10 +40,17 @@ public class UpdatedNominalValueDownloader implements Tasklet {
         parameters.put("escolha", "2");
         parameters.put("Idioma", "US");
         parameters.put("saida", "csv");
-        
-        var file = fileDownloadService.downloadFile(new URL(this.fileUrl), HttpMethod.POST, parameters);
 
-        jobContext.put("fileContent", file != null ? file.getContentAsByteArray() : new byte[] {});
+        var fileResource = fileDownloadService.downloadFile(new URL(this.fileUrl), HttpMethod.POST, parameters);
+        if (fileResource == null) {
+            throw new IllegalStateException("Downloaded file is null");
+        }
+        var fileContent = fileResource.getContentAsByteArray();
+        if (fileContent.length == 0) {
+            throw new IllegalStateException("Downloaded file is empty");
+        }
+
+        jobContext.put("fileContent", fileContent);
         jobContext.put("referenceDate", this.referenceDate);
 
         return RepeatStatus.FINISHED;

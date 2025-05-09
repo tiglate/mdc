@@ -103,19 +103,11 @@ class UpdatedNominalValueDownloaderTest {
     }
 
     @Test
-    void execute_shouldHandleNullDownloadResult() throws Exception {
+    void execute_shouldThrowException_whenEmptyResponse() throws Exception {
         // Given
         when(fileDownloadService.downloadFile(any(URL.class), eq(HttpMethod.POST), any())).thenReturn(null);
 
-        // When
-        var result = tasklet.execute(stepContribution, chunkContext);
-
-        // Then
-        assertEquals(RepeatStatus.FINISHED, result);
-        
-        // Verify execution context contains empty byte array
-        assertArrayEquals(new byte[0], (byte[]) executionContext.get("fileContent"));
-        assertEquals(referenceDate, executionContext.get("referenceDate"));
+        assertThrows(IllegalStateException.class, () -> tasklet.execute(stepContribution, chunkContext));
     }
 
     @Test

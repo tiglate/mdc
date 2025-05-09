@@ -143,18 +143,11 @@ class TradingAdjustmentsDownloaderTest {
     }
 
     @Test
-    void execute_shouldHandleEmptyResponse() throws Exception {
+    void execute_shouldThrowException_whenEmptyResponse() throws Exception {
         // Given
         when(fileDownloadService.downloadFile(any(URL.class), eq(HttpMethod.POST), any(Map.class)))
                 .thenReturn(null);
 
-        // When
-        var result = tasklet.execute(stepContribution, chunkContext);
-
-        // Then
-        assertEquals(RepeatStatus.FINISHED, result);
-        
-        // Verify execution context was populated with empty byte array
-        assertArrayEquals(new byte[]{}, (byte[]) executionContext.get("fileContent"));
+        assertThrows(IllegalStateException.class, () -> tasklet.execute(stepContribution, chunkContext));
     }
 }

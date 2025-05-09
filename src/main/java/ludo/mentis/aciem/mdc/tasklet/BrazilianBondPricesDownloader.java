@@ -37,8 +37,17 @@ public class BrazilianBondPricesDownloader implements Tasklet {
                 .getJobExecution()
                 .getExecutionContext();
 
+        var fileResource = fileDownloadService.downloadFile(fileUrl);
+        if (fileResource == null) {
+            throw new IllegalStateException("Downloaded file '" + fileName + "' is null");
+        }
+        var fileContent = fileResource.getContentAsByteArray();
+        if (fileContent.length == 0) {
+            throw new IllegalStateException("Downloaded file '" + fileName + "' is empty");
+        }
+
         jobContext.put("fileName", fileName);
-        jobContext.put("fileContent", fileDownloadService.downloadFile(fileUrl).getContentAsByteArray());
+        jobContext.put("fileContent", fileContent);
         jobContext.put("referenceDate", this.referenceDate);
 
         return RepeatStatus.FINISHED;
