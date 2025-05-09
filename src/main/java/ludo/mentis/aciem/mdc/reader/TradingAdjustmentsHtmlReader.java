@@ -10,15 +10,13 @@ import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
-import org.springframework.batch.item.UnexpectedInputException;
 
 import ludo.mentis.aciem.mdc.model.TradingAdjustment;
 
 public class TradingAdjustmentsHtmlReader implements ItemReader<TradingAdjustment> {
 	
-	private static Logger log = LoggerFactory.getLogger(TradingAdjustmentsHtmlReader.class);
+	private static final Logger log = LoggerFactory.getLogger(TradingAdjustmentsHtmlReader.class);
 
     private Iterator<TradingAdjustment> dataIterator;
     private boolean initialized = false;
@@ -29,7 +27,7 @@ public class TradingAdjustmentsHtmlReader implements ItemReader<TradingAdjustmen
     }
 
     @Override
-    public TradingAdjustment read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+    public TradingAdjustment read() throws Exception {
         if (!initialized) {
         	dataIterator = parseHtmlTable().iterator();
         	this.initialized = true;

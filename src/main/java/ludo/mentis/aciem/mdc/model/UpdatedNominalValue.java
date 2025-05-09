@@ -4,9 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import org.springframework.aot.generate.Generated;
-
-@Generated
 public class UpdatedNominalValue {
 
 	private LocalDate referenceDate;

@@ -15,6 +15,18 @@ Downloads various financial indicators from B3 (Brazilian Stock Exchange).
 ### 💱 Ptax
 Downloads the dollar exchange rate in relation to the Brazilian Real from the Brazilian Central Bank (BACEN).
 
+### 🔄 ExchangeRateParity
+Downloads exchange rate parity data from the Brazilian Central Bank (BACEN).
+
+### 📊 InterestRateCurves
+Downloads interest rate curve data from Anbima, which is used for pricing and risk management.
+
+### 📝 TradingAdjustments
+Downloads trading adjustments data from B3 (Brazilian Stock Exchange).
+
+### 💵 UpdatedNominalValues
+Downloads updated nominal values of financial instruments from Anbima.
+
 ## 🛠️ Requirements
 - Java 17 or higher
 - Maven 3.6 or higher
@@ -42,9 +54,13 @@ The application uses `application.properties` for configuration. Key settings in
 
 ### Output Directories
 ```properties
-brazilian-bond-prices.output-dir=C:/temp/anbima
-financial-indicators.output-dir=C:/temp/b3
-ptax.output-dir=C:/temp/ptax
+brazilian-bond-prices.output-dir=C:/temp/mdc/
+financial-indicators.output-dir=C:/temp/mdc/
+ptax.output-dir=C:/temp/mdc/
+exchange-rate-parity.output-dir=C:/temp/mdc/
+interest-rate-curve.output-dir=C:/temp/mdc/
+updated-nominal-values.output-dir=C:/temp/mdc/
+trading-adjustments.output-dir=C:/temp/mdc/
 ```
 
 ### Data Source URLs
@@ -52,6 +68,10 @@ ptax.output-dir=C:/temp/ptax
 brazilian-bond-prices.download-base-url=https://www.anbima.com.br/informacoes/merc-sec/arqs/
 financial-indicators.download-url=https://sistemaswebb3-derivativos.b3.com.br/financialIndicatorsProxy/FinancialIndicators/GetFinancialIndicators/eyJsYW5ndWFnZSI6InB0LWJyIn0=
 ptax.download-url=https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='%s'&@dataFinalCotacao='%s'&$top=100&$format=json&$select=cotacaoCompra,cotacaoVenda,dataHoraCotacao
+exchange-rate-parity.download-url=https://www4.bcb.gov.br/Download/fechamento/
+interest-rate-curve.download-url=https://www.anbima.com.br/informacoes/est-termo/CZ-down.asp
+updated-nominal-values.download-url=https://www.anbima.com.br/informacoes/vna/vna-down.asp
+trading-adjustments.download-url=https://www2.bmf.com.br/pages/portal/bmfbovespa/lumis/lum-ajustes-do-pregao-ptBR.asp
 ```
 
 ### HTTP Client Settings
@@ -76,11 +96,19 @@ file-downloader.http-client.proxy.enabled=false
 mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=BrazilianBondPrices"
 mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=FinancialIndicators"
 mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=Ptax"
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=ExchangeRateParity"
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=InterestRateCurves"
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=TradingAdjustments"
+mvn spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=UpdatedNominalValues"
 
 # Using the JAR file
 java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=BrazilianBondPrices
 java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=FinancialIndicators
 java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=Ptax
+java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=ExchangeRateParity
+java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=InterestRateCurves
+java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=TradingAdjustments
+java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=UpdatedNominalValues
 ```
 
 ### Running with a specific reference date (for BrazilianBondPrices)
@@ -93,10 +121,10 @@ java -jar target/mdc-0.0.1-SNAPSHOT.jar --spring.batch.job.name=BrazilianBondPri
 ```
 
 ## 📁 Output
-After running a job, Excel files will be generated in the configured output directories:
-- BrazilianBondPrices: `C:/temp/anbima/`
-- FinancialIndicators: `C:/temp/b3/`
-- Ptax: `C:/temp/ptax/`
+After running a job, Excel files will be generated in the configured output directory:
+`C:/temp/mdc/`
+
+Each job will create its own Excel file in this directory.
 
 ## 🔄 Workflow
 1. The application downloads data from the specified source

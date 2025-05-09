@@ -12,12 +12,13 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.support.AbstractItemStreamItemReader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.NonNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -81,13 +82,13 @@ public class PtaxJsonReader extends AbstractItemStreamItemReader<Ptax> {
     }
 
     @Override
-    public void open(ExecutionContext executionContext) throws ItemStreamException {
+    public void open(@NonNull ExecutionContext executionContext) throws ItemStreamException {
         try {
             PtaxWrapper wrapper = objectMapper.readValue(resource.getInputStream(), PtaxWrapper.class);
             if (wrapper != null && wrapper.getValue() != null) {
                 ptaxIterator = wrapper.getValue().iterator();
             } else {
-                ptaxIterator = new ArrayList<Ptax>().iterator();
+                ptaxIterator = Collections.emptyIterator();
             }
         } catch (IOException e) {
             throw new ItemStreamException("Error reading Ptax data", e);
@@ -95,7 +96,7 @@ public class PtaxJsonReader extends AbstractItemStreamItemReader<Ptax> {
     }
 
     @Override
-    public Ptax read() throws Exception {
+    public Ptax read() {
         if (ptaxIterator != null && ptaxIterator.hasNext()) {
             return ptaxIterator.next();
         }
@@ -103,7 +104,7 @@ public class PtaxJsonReader extends AbstractItemStreamItemReader<Ptax> {
     }
 
     @Override
-    public void update(ExecutionContext executionContext) throws ItemStreamException {
+    public void update(@NonNull ExecutionContext executionContext) throws ItemStreamException {
         // No state to update
     }
 

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Trading Adjustments Test - Missing Columns</title>
+    <meta charset="windows-1252">
+</head>
+<body>
+    <table id="tblDadosAjustes">
+        <thead>
+            <tr>
+                <th>Mercadoria</th>
+                <th>Vencimento</th>
+                <th>Preço de ajuste anterior</th>
+                <th>Preço de ajuste Atual</th>
+                <th>Variação</th>
+                <th>Valor do ajuste por contrato (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>DOL</td>
+                <td>JUN/23</td>
+                <td>5.000,00</td>
+                <td>5.100,00</td>
+                <td>100,00</td>
+                <td>500,00</td>
+            </tr>
+            <!-- Row with missing columns -->
+            <tr>
+                <td>DOL</td>
+                <td>JUL/23</td>
+                <td>5.050,00</td>
+                <!-- Missing columns -->
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

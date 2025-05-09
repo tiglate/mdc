@@ -24,7 +24,7 @@ class CustomLocalDateEditorTest {
         // Then
         var result = editor.getValue();
         assertNotNull(result);
-        assertTrue(result instanceof LocalDate);
+        assertInstanceOf(LocalDate.class, result);
         assertEquals(LocalDate.of(2023, 5, 15), result);
     }
 
@@ -41,7 +41,7 @@ class CustomLocalDateEditorTest {
         // Then
         var result = editor.getValue();
         assertNotNull(result);
-        assertTrue(result instanceof LocalDate);
+        assertInstanceOf(LocalDate.class, result);
         assertEquals(LocalDate.of(2023, 5, 15), result);
     }
 
@@ -128,7 +128,7 @@ class CustomLocalDateEditorTest {
             // Then
             var result = editor.getValue();
             assertNotNull(result);
-            assertTrue(result instanceof LocalDate);
+            assertInstanceOf(LocalDate.class, result);
             assertEquals(LocalDate.of(2023, 5, 15), result);
         }
     }

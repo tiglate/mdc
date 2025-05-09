@@ -101,7 +101,7 @@ class BackupFileHandlerImplTest {
         var expectedPathPart = String.format("2023%s05%s15%sfileWithoutParent.txt",
                                                File.separator, File.separator, File.separator);
         assertTrue(result.toString().contains(expectedPathPart), 
-                   "Path should contain " + expectedPathPart + " but was " + result.toString());
+                   "Path should contain " + expectedPathPart + " but was " + result);
     }
 
     @Test

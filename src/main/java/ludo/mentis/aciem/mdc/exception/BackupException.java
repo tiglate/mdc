@@ -2,6 +2,8 @@ package ludo.mentis.aciem.mdc.exception;
 
 import org.springframework.aot.generate.Generated;
 
+import java.io.Serial;
+
 /**
  * Runtime exception thrown when a backup operation fails.
  * This exception is used to indicate issues encountered during
@@ -10,7 +12,8 @@ import org.springframework.aot.generate.Generated;
 @Generated
 public class BackupException extends RuntimeException {
 
-	private static final long serialVersionUID = -1678445165889158840L;
+	@Serial
+    private static final long serialVersionUID = -1678445165889158840L;
 
 	/**
      * Constructs a new BackupException with the specified detail message.

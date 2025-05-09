@@ -4,9 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import org.springframework.aot.generate.Generated;
-
-@Generated
 public class InterestRateCurve {
 	
 	private LocalDate referenceDate;
@@ -19,7 +16,7 @@ public class InterestRateCurve {
 	private BigDecimal lambda2;
 	
 	public InterestRateCurve() {
-		// Default constructor is required by some parsing frameworks
+		// Required by some parsing frameworks
 	}
 	
 	public LocalDate getReferenceDate() {

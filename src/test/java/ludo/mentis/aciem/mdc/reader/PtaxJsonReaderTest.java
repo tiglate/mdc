@@ -27,7 +27,7 @@ class PtaxJsonReaderTest {
     }
 
     @Test
-    void shouldReadValidFile() throws Exception {
+    void shouldReadValidFile() {
         // When
         var firstItem = reader.read();
 
@@ -42,7 +42,7 @@ class PtaxJsonReaderTest {
     }
 
     @Test
-    void shouldReadAllItemsFromValidFile() throws Exception {
+    void shouldReadAllItemsFromValidFile() {
         // When/Then
         int count = 0;
         Ptax item;
@@ -58,7 +58,7 @@ class PtaxJsonReaderTest {
     }
 
     @Test
-    void shouldReadSecondItemCorrectly() throws Exception {
+    void shouldReadSecondItemCorrectly() {
         // Skip first item
         reader.read();
         

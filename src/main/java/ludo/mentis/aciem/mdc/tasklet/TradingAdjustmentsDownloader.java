@@ -12,6 +12,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 import ludo.mentis.aciem.mdc.model.HttpMethod;
 import ludo.mentis.aciem.mdc.service.FileDownloadService;
+import org.springframework.lang.NonNull;
 
 public class TradingAdjustmentsDownloader implements Tasklet {
 
@@ -29,7 +30,7 @@ public class TradingAdjustmentsDownloader implements Tasklet {
 	}
 
 	@Override
-	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+	public RepeatStatus execute(@NonNull StepContribution contribution, @NonNull ChunkContext chunkContext) throws Exception {
         var jobContext = contribution.getStepExecution()
                 .getJobExecution()
                 .getExecutionContext();

@@ -41,6 +41,7 @@ class InterestRateCurveCsvReaderTest {
 
         // Prepare general bad file content
         String badContent = "This is not a valid CSV file";
+        //noinspection ResultOfMethodCallIgnored
         badContent.getBytes(StandardCharsets.UTF_8);
     }
 
